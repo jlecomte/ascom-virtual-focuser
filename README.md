@@ -4,6 +4,7 @@
 - [Screenshots](#screenshots)
 - [Downloading And Installing The Driver](#downloading-and-installing-the-driver)
 - [Compiling The Driver (For Developers Only)](#compiling-the-driver-for-developers-only)
+- [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
 
 ## Introduction
 
@@ -19,28 +20,14 @@ To select the focuser device driver to connect to, open the settings dialog:
 
 ## Downloading And Installing The Driver
 
-**Step 1:** Download the driver from the [releases page](https://github.com/jlecomte/ascom-virtual-focuser/releases), and place the file `ASCOM.DarkSkyGeek.VirtualFocuser.dll` somewhere on your system (example: `C:\Users\julien\ascom-virtual-focuser\`).
-
-**Step 2:** Open a command prompt, but make sure you run it **as an administrator**!
-
-**Step 3:** Then, proceed with the installation of the driver using `RegAsm.exe`, a utility that should already be present on your system (it comes with the .NET framework). Just don't forget to use the 64 bit version, and to pass the `/tlb /codebase` flags. Here is what it looked like on my imaging mini computer:
-
-```
-> cd C:\Users\julien\ascom-virtual-focuser\
-> C:\Windows\Microsoft.NET\Framework64\v4.0.30319\RegAsm.exe /tlb /codebase ASCOM.DarkSkyGeek.VirtualFocuser.dll
-Microsoft .NET Framework Assembly Registration Utility version 4.8.4161.0
-for Microsoft .NET Framework version 4.8.4161.0
-Copyright (C) Microsoft Corporation.  All rights reserved.
-
-Types registered successfully
-```
-
-**Note:** The output may be more verbose than the above. As long as it says `Types registered successfully`, you are good to go!
-
-**Note:** Once the driver has been installed, make sure you do _not_ delete or move the `ASCOM.DarkSkyGeek.VirtualFocuser.dll` file, or things will not work! (if you do move it, you will need to register it again in its new location)
-
-**Step 4:** Start (or restart, if it was already running) N.I.N.A. (or whatever application you use to control your equipment).
+Starting with version `1.0.1`, you can install the ASCOM driver by running the executable setup file that you will find in the [releases page](https://github.com/jlecomte/ascom-virtual-focuser/releases). By default, it places files under `C:\Program Files (x86)\Dark Sky Geek\Virtual Focuser ASCOM Driver`.
 
 ## Compiling The Driver (For Developers Only)
 
-Open Microsoft Visual Studio as an administrator (right-click on the Microsoft Visual Studio shortcut, and select "Run as administrator"). This is required because when building the code, by default, Microsoft Visual Studio will register the compiled COM components, and this operation requires special privileges (Note: This is something you can disable in the project settings...) Then, open the solution (`ASCOM.DarkSkyGeek.VirtualFocuser.sln`), change the solution configuration to `Release` (in the toolbar), open the `Build` menu, and click on `Build Solution`. As long as you have properly installed all the required dependencies, the build should succeed and the ASCOM driver will be registered on your system. The binary file generated will be `bin\Release\ASCOM.DarkSkyGeek.VirtualFocuser.dll`. You may also download this file from the [Releases page](https://github.com/jlecomte/ascom-virtual-focuser/releases).
+Open Microsoft Visual Studio as an administrator (right-click on the Microsoft Visual Studio shortcut, and select "Run as administrator"). This is required because when building the code, by default, Microsoft Visual Studio will register the compiled COM components, and this operation requires special privileges (Note: This is something you can disable in the project settings...) Then, open the solution (`ASCOM_Driver\ASCOM.DarkSkyGeek.VirtualFocuser.sln`), change the solution configuration to `Release` (in the toolbar), open the `Build` menu, and click on `Build Solution`. As long as you have properly installed all the required dependencies, the build should succeed and the ASCOM driver will be registered on your system. The binary file generated will be `ASCOM_Driver\bin\Release\ASCOM.DarkSkyGeek.VirtualFocuser.dll`. You may also download this file from the [Releases page](https://github.com/jlecomte/ascom-virtual-focuser/releases).
+
+## Frequently Asked Questions (FAQ)
+
+**Question:** My antivirus identifies your setup executable file as a malware (some kind of Trojan)
+
+**Answer:** This is a false detection, extremely common with installers created with [Inno Setup](https://jrsoftware.org/isinfo.php) because virus and malware authors also use Inno Setup to distribute their malicious payload... Anyway, there isn't much I can do about this, short of signing the executable. Unfortunately, that would require a code signing certificate, which costs money. So, even though the executable I uploaded to GitHub is perfectly safe, use at your own risk!

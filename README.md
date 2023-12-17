@@ -9,11 +9,13 @@
 
 This ASCOM driver provides additional functionality on top of the specified focuser device driver it connects to. At the time of this writing, the only functionality that has been implemented so far is that it averages temperature readings over 120 seconds. Indeed, the temperature reported by some focusers, like ZWO’s EAF, can be "jumpy". In order to implement temperature compensation, it is essential to have an accurate and stable temperature reading, which is what this virtual driver accomplishes. In the future, additional functionality may be implemented as needed by the author.
 
+Another example is position tolerance. Some old focusers miss one or two steps when moving. Usually, this difference is not visible in the image, but the focusing algorithm will never finish or may fail due to a timeout. In this example, we have added a focuser tolerance, and it will report the goal focus position when asked if the real driver position is within this tolerance.
+
 ## Screenshots
 
 To select the focuser device driver to connect to, open the settings dialog:
 
-![Screenshot of settings dialog](screenshot.png)
+![Screenshot of settings dialog](Images/screenshot.png)
 
 ## Downloading And Installing The Driver
 

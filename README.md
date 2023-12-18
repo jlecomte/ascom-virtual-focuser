@@ -10,7 +10,15 @@
 
 This ASCOM driver provides additional functionality on top of the specified focuser device driver it connects to. At the time of this writing, the only functionality that has been implemented so far is that it averages temperature readings over 120 seconds. Indeed, the temperature reported by some focusers, like ZWO’s EAF, can be "jumpy". In order to implement temperature compensation, it is essential to have an accurate and stable temperature reading, which is what this virtual driver accomplishes. In the future, additional functionality may be implemented as needed by the author.
 
-Another example is position tolerance. Some old focusers miss one or two steps when moving. Usually, this difference is not visible in the image, but the focusing algorithm will never finish or may fail due to a timeout. In this example, we have added a focuser tolerance, and it will report the goal focus position when asked if the real driver position is within this tolerance.
+### A tale of a flawed focuser
+
+Certain older focusers, such as the Hedrick focuser on our club's Planetwave 17" CDK telescope, occasionally skip one or two steps during movement. This issue becomes apparent when using the original Celestron handset, which Planetwave had recommended for this focuser some years ago. Regrettably, the sole remedy suggested by Planetwave was to invest in a costly upgrade of the focuser's electronics and software—a solution that seemed excessive for addressing a relatively minor flaw in an otherwise functional focuser.
+
+During the autofocus (AF) curve process executed by software like N.I.N.A or SGP, instructions are transmitted to the focuser to reach a specific position. Subsequently, the software continuously checks with the driver until the specified position is attained. However, due to the intermittent step inaccuracies in our focuser, certain movements never reach their intended positions. For instance, if the AF routine instructs the focuser to move to position 4560, it might halt at 4559 steps, leading to an autofocus failure.
+
+While this positioning discrepancy might not be perceptible in the resulting images, it disrupts the AF algorithm, preventing it from concluding successfully. In our equipment, each AF curve point is set 500 steps apart from its neighbors, making the error ratio 1/500th.
+
+Our devised solution involves establishing a focuser tolerance. Whenever the AF process directs the focuser to move to a specific position, we not only record this target position but also relay it to the original driver. As the focuser is in motion, this wrapper serves as a pass-through, conveying data from the wrapped driver to the AF algorithm. Once the focuser completes its movement, if the final position falls within the defined tolerance, we return the original goal position. This approach enables the AF algorithm to continue functioning seamlessly. However, if the final value exceeds the tolerance, we provide the actual position, facilitating the identification and diagnosis of the underlying problem.
 
 ## Screenshots
 

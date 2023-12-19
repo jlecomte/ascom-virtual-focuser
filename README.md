@@ -1,10 +1,12 @@
 # Virtual Focuser ASCOM Driver
 
-- [Introduction](#introduction)
-- [Screenshots](#screenshots)
-- [Downloading And Installing The Driver](#downloading-and-installing-the-driver)
-- [Compiling The Driver (For Developers Only)](#compiling-the-driver-for-developers-only)
-- [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
+* [Introduction](#introduction)
+  + [Stable Temperature Reading](#stable-temperature-reading)
+  + [Focuser Skipping Steps](#focuser-skipping-steps)
+* [Screenshots](#screenshots)
+* [Downloading And Installing The Driver](#downloading-and-installing-the-driver)
+* [Compiling The Driver (For Developers Only)](#compiling-the-driver-for-developers-only)
+* [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
 
 ## Introduction
 
@@ -28,7 +30,7 @@ By default, the tolerance is set to 0, but it can be increased in the focuser se
 
 To select the focuser device driver to connect to, open the settings dialog:
 
-![Screenshot of settings dialog](screenshot.png)
+![Screenshot of settings dialog](Images/screenshot.png)
 
 ## Downloading And Installing The Driver
 

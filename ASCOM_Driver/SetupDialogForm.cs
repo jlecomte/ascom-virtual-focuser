@@ -19,14 +19,14 @@ namespace ASCOM.DarkSkyGeek
     public partial class SetupDialogForm : Form
     {
         // Holder for a reference to the driver's trace logger
-        TraceLogger tl;
+        readonly VirtualFocuser virtualFocuserInstance;
 
-        public SetupDialogForm(TraceLogger tlDriver)
+        public SetupDialogForm(VirtualFocuser virtualFocuserInstance)
         {
             InitializeComponent();
 
             // Save the provided trace logger for use within the setup dialogue
-            tl = tlDriver;
+            this.virtualFocuserInstance = virtualFocuserInstance;
         }
 
         private void SetupDialogForm_Load(object sender, EventArgs e)
@@ -45,24 +45,26 @@ namespace ASCOM.DarkSkyGeek
                     item.Value = kv.Key;
                     int index = focuserSelectorComboBox.Items.Add(item);
                     // Select newly added item if it matches the value stored in the profile.
-                    if (kv.Key == VirtualFocuser.focuserId)
+                    if (kv.Key == virtualFocuserInstance.focuserId)
                     {
                         focuserSelectorComboBox.SelectedIndex = index;
                     }
                 }
             }
 
-            chkTrace.Checked = tl.Enabled;
+            chkTrace.Checked = virtualFocuserInstance.tl.Enabled;
+            positionToleranceNumericUpDown.Value = virtualFocuserInstance.positionTolerance;
         }
 
         private void cmdOK_Click(object sender, EventArgs e) // OK button event handler
         {
             if (focuserSelectorComboBox.SelectedItem != null)
             {
-                VirtualFocuser.focuserId = (focuserSelectorComboBox.SelectedItem as ComboboxItem).Value;
+                virtualFocuserInstance.focuserId = (focuserSelectorComboBox.SelectedItem as ComboboxItem).Value;
             }
 
-            tl.Enabled = chkTrace.Checked;
+            virtualFocuserInstance.tl.Enabled = chkTrace.Checked;
+            virtualFocuserInstance.positionTolerance = (uint) positionToleranceNumericUpDown.Value;
         }
 
         private void cmdCancel_Click(object sender, EventArgs e) // Cancel button event handler

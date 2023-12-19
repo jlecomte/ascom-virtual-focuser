@@ -37,7 +37,7 @@ namespace ASCOM.DarkSkyGeek
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
-        private static string driverDescription = "DarkSkyGeek’s Virtual Focuser ASCOM Driver";
+        private static readonly string driverDescription = "DarkSkyGeek’s Virtual Focuser ASCOM Driver";
 
         // Constants used for Profile persistence
         internal static string traceStateProfileName = "Trace Level";
@@ -46,8 +46,24 @@ namespace ASCOM.DarkSkyGeek
         internal static string focuserIdProfileName = "Focuser ID";
         internal static string focuserIdDefault = string.Empty;
 
+        internal static string positionToleranceProfileName = "Position Tolerance";
+        internal static string positionToleranceDefault = "0";
+
         // Variables to hold the current device configuration
-        internal static string focuserId = string.Empty;
+        internal string focuserId = string.Empty;
+        internal uint positionTolerance = 0;
+
+        /// <summary>
+        /// Constant defining how many seconds to consider when computing the average temperature value.
+        /// 2 minutes seems like a reasonably-sized time window based on my tests.
+        /// </summary>
+        public const int TEMPERATURE_WINDOW_IN_SECONDS = 120;
+
+        /// <summary>
+        /// Minimum and maximum accepted values for temperature readings (in Celsius degrees).
+        /// </summary>
+        public const int MAX_TEMP_ALLOWED = 50;
+        public const int MIN_TEMP_ALLOWED = -30;
 
         /// <summary>
         /// Variable to hold the trace logger object (creates a diagnostic log file with information that you specify)
@@ -65,8 +81,8 @@ namespace ASCOM.DarkSkyGeek
         private ASCOM.DriverAccess.Focuser focuser;
 
         /// <summary>
-        /// Private variable to hold the temperature values we were able to obtain in the last 60 seconds
-        /// (the queue length is therefore <= 60)
+        /// Private variable to hold the temperature values we were able to obtain in the last `TEMPERATURE_WINDOW_IN_SECONDS` seconds
+        /// (the queue length is therefore <= TEMPERATURE_WINDOW_IN_SECONDS)
         /// </summary>
         private Queue<TemperatureReading> temperatures = new Queue<TemperatureReading>();
 
@@ -76,9 +92,9 @@ namespace ASCOM.DarkSkyGeek
         private readonly object _temperaturesLockObject = new object();
 
         /// <summary>
-        /// Constant defining how many seconds to consider when computing the average temperature value.
+        /// Private variable used to remember the last position the focuser was asked to move to...
         /// </summary>
-        public const int TEMPERATURE_WINDOW_IN_SECONDS = 120;
+        private int? _lastRequestedPosition = null;
 
         public VirtualFocuser()
         {
@@ -104,7 +120,7 @@ namespace ASCOM.DarkSkyGeek
                 {
                     long now = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-                    // Remove any temperature reading older than 60 seconds.
+                    // Remove any temperature reading older than `TEMPERATURE_WINDOW_IN_SECONDS` seconds.
                     temperatures = new Queue<TemperatureReading>(temperatures.Where(x => x.Timestamp >= now - TEMPERATURE_WINDOW_IN_SECONDS));
 
                     // Add new temperature reading, if we are connected to the focuser.
@@ -116,7 +132,13 @@ namespace ASCOM.DarkSkyGeek
                             // This will throw if the focuser cannot report the temperature, hence the try ... catch!
                             temperatureReading.Temperature = focuser.Temperature;
                             temperatureReading.Timestamp = now;
-                            temperatures.Enqueue(temperatureReading);
+                            // I have seen the QHY Q-Focuser occasionally report insane values (like a million degrees)
+                            // for a very short period of time, before coming back to its senses... These crazy values
+                            // will completely skew the mean temperature calculation, so we ignore them thanks to this test:
+                            if (temperatureReading.Temperature >= MIN_TEMP_ALLOWED && temperatureReading.Temperature <= MAX_TEMP_ALLOWED)
+                            {
+                                temperatures.Enqueue(temperatureReading);
+                            }
                         }
                         catch (Exception)
                         {
@@ -142,7 +164,7 @@ namespace ASCOM.DarkSkyGeek
             if (IsConnected)
                 System.Windows.Forms.MessageBox.Show("Already connected, just press OK");
 
-            using (SetupDialogForm F = new SetupDialogForm(tl))
+            using (SetupDialogForm F = new SetupDialogForm(this))
             {
                 var result = F.ShowDialog();
                 if (result == System.Windows.Forms.DialogResult.OK)
@@ -226,8 +248,10 @@ namespace ASCOM.DarkSkyGeek
                     {
                         try
                         {
-                            focuser = new ASCOM.DriverAccess.Focuser(focuserId);
-                            focuser.Connected = true;
+                            focuser = new ASCOM.DriverAccess.Focuser(focuserId)
+                            {
+                                Connected = true
+                            };
 
                             connectedState = true;
                         }
@@ -365,6 +389,7 @@ namespace ASCOM.DarkSkyGeek
         {
             CheckConnected("Move");
             focuser.Move(Position);
+            _lastRequestedPosition = Position;
         }
 
         public int Position
@@ -372,6 +397,16 @@ namespace ASCOM.DarkSkyGeek
             get
             {
                 CheckConnected("Position");
+
+                if (positionTolerance > 0 && !this.IsMoving && _lastRequestedPosition != null)
+                {
+                    var expectedPosition = _lastRequestedPosition ?? 0;
+                    if (Math.Abs(focuser.Position - expectedPosition) <= positionTolerance)
+                    {
+                        return expectedPosition;
+                    }
+                }
+
                 return focuser.Position;
             }
         }
@@ -523,6 +558,7 @@ namespace ASCOM.DarkSkyGeek
                 {
                     tl.Enabled = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
                     focuserId = driverProfile.GetValue(driverID, focuserIdProfileName, string.Empty, focuserIdDefault);
+                    positionTolerance = Convert.ToUInt32(driverProfile.GetValue(driverID, positionToleranceProfileName, string.Empty, positionToleranceDefault));
                 }
                 catch (Exception e)
                 {
@@ -538,6 +574,7 @@ namespace ASCOM.DarkSkyGeek
                 driverProfile.DeviceType = "Focuser";
                 driverProfile.WriteValue(driverID, traceStateProfileName, tl.Enabled.ToString());
                 driverProfile.WriteValue(driverID, focuserIdProfileName, focuserId);
+                driverProfile.WriteValue(driverID, positionToleranceProfileName, positionTolerance.ToString());
             }
         }
 
@@ -557,7 +594,7 @@ namespace ASCOM.DarkSkyGeek
 
         public override string ToString()
         {
-            return Temperature + "�C [Time: " + Timestamp + "]";
+            return Temperature + "°C [Time: " + Timestamp + "]";
         }
     }
 }

@@ -36,7 +36,10 @@ namespace ASCOM.DarkSkyGeek
             this.descriptionLabel = new System.Windows.Forms.Label();
             this.focuserSelectorLabel = new System.Windows.Forms.Label();
             this.focuserSelectorComboBox = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.positionToleranceNumericUpDown = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.DSGLogo)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.positionToleranceNumericUpDown)).BeginInit();
             this.SuspendLayout();
             // 
             // cmdOK
@@ -44,7 +47,7 @@ namespace ASCOM.DarkSkyGeek
             this.cmdOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.cmdOK.Image = global::ASCOM.DarkSkyGeek.Properties.Resources.icon_ok_24;
-            this.cmdOK.Location = new System.Drawing.Point(314, 158);
+            this.cmdOK.Location = new System.Drawing.Point(314, 191);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(59, 36);
             this.cmdOK.TabIndex = 0;
@@ -56,7 +59,7 @@ namespace ASCOM.DarkSkyGeek
             this.cmdCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.cmdCancel.Image = global::ASCOM.DarkSkyGeek.Properties.Resources.icon_cancel_24;
-            this.cmdCancel.Location = new System.Drawing.Point(379, 158);
+            this.cmdCancel.Location = new System.Drawing.Point(379, 191);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(59, 36);
             this.cmdCancel.TabIndex = 1;
@@ -67,7 +70,7 @@ namespace ASCOM.DarkSkyGeek
             // 
             this.chkTrace.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.chkTrace.AutoSize = true;
-            this.chkTrace.Location = new System.Drawing.Point(12, 177);
+            this.chkTrace.Location = new System.Drawing.Point(12, 210);
             this.chkTrace.Name = "chkTrace";
             this.chkTrace.Size = new System.Drawing.Size(69, 17);
             this.chkTrace.TabIndex = 6;
@@ -115,11 +118,29 @@ namespace ASCOM.DarkSkyGeek
             this.focuserSelectorComboBox.Size = new System.Drawing.Size(370, 21);
             this.focuserSelectorComboBox.TabIndex = 10;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(13, 157);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(98, 13);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "Position Tolerance:";
+            // 
+            // positionToleranceNumericUpDown
+            // 
+            this.positionToleranceNumericUpDown.Location = new System.Drawing.Point(117, 155);
+            this.positionToleranceNumericUpDown.Name = "positionToleranceNumericUpDown";
+            this.positionToleranceNumericUpDown.Size = new System.Drawing.Size(54, 20);
+            this.positionToleranceNumericUpDown.TabIndex = 13;
+            // 
             // SetupDialogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(448, 202);
+            this.ClientSize = new System.Drawing.Size(448, 235);
+            this.Controls.Add(this.positionToleranceNumericUpDown);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.focuserSelectorComboBox);
             this.Controls.Add(this.focuserSelectorLabel);
             this.Controls.Add(this.descriptionLabel);
@@ -136,6 +157,7 @@ namespace ASCOM.DarkSkyGeek
             this.Text = "DarkSkyGeek’s Virtual Focuser ASCOM Driver";
             this.Load += new System.EventHandler(this.SetupDialogForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.DSGLogo)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.positionToleranceNumericUpDown)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -150,5 +172,7 @@ namespace ASCOM.DarkSkyGeek
         private System.Windows.Forms.Label descriptionLabel;
         private System.Windows.Forms.Label focuserSelectorLabel;
         private System.Windows.Forms.ComboBox focuserSelectorComboBox;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.NumericUpDown positionToleranceNumericUpDown;
     }
 }

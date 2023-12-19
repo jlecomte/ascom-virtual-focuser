@@ -118,6 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="descriptionLabel.Text" xml:space="preserve">
-    <value>This driver forwards calls to the real focusing device selected below. It can enhance the behavior of an existing focuser. For example, it can stabilize the temperature reading of some focusers by averaging values over 60 seconds. In future versions, additional enhancements may be added.</value>
+    <value>This driver forwards calls to the real focusing device selected below. It can enhance the behavior of an existing focuser, or work around its limitations. Please, refer to the GitHub repository for more details.</value>
   </data>
 </root>

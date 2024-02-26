@@ -40,9 +40,11 @@ namespace ASCOM.DarkSkyGeek
                 // Don't include the virtual focuser in the list, for obvious reasons...
                 if (kv.Key != VirtualFocuser.driverID)
                 {
-                    ComboboxItem item = new ComboboxItem();
-                    item.Text = kv.Value;
-                    item.Value = kv.Key;
+                    ComboboxItem item = new ComboboxItem
+                    {
+                        Text = kv.Value,
+                        Value = kv.Key
+                    };
                     int index = focuserSelectorComboBox.Items.Add(item);
                     // Select newly added item if it matches the value stored in the profile.
                     if (kv.Key == virtualFocuserInstance.focuserId)
@@ -51,6 +53,26 @@ namespace ASCOM.DarkSkyGeek
                     }
                 }
             }
+
+            // Populate observing conditions device list...
+            ArrayList observingConditionsDevices = profile.RegisteredDevices("ObservingConditions");
+            foreach (KeyValuePair kv in observingConditionsDevices)
+            {
+                ComboboxItem item = new ComboboxItem
+                {
+                    Text = kv.Value,
+                    Value = kv.Key
+                };
+                int index = observingConditionsDeviceComboBox.Items.Add(item);
+                // Select newly added item if it matches the value stored in the profile.
+                if (kv.Key == virtualFocuserInstance.observingConditionsDeviceId)
+                {
+                    observingConditionsDeviceComboBox.SelectedIndex = index;
+                }
+            }
+
+            useFocuserForTemperatureRadioBtn.Checked = (virtualFocuserInstance.temperatureSource == TemperatureSource.FOCUSER);
+            useObservingConditionsDeviceForTemperatureRadioBtn.Checked = (virtualFocuserInstance.temperatureSource == TemperatureSource.OBSERVING_CONDITIONS_DEVICE);
 
             chkTrace.Checked = virtualFocuserInstance.tl.Enabled;
             positionToleranceNumericUpDown.Value = virtualFocuserInstance.positionTolerance;
@@ -61,6 +83,16 @@ namespace ASCOM.DarkSkyGeek
             if (focuserSelectorComboBox.SelectedItem != null)
             {
                 virtualFocuserInstance.focuserId = (focuserSelectorComboBox.SelectedItem as ComboboxItem).Value;
+            }
+
+            if (useObservingConditionsDeviceForTemperatureRadioBtn.Checked && observingConditionsDeviceComboBox.SelectedItem != null)
+            {
+                virtualFocuserInstance.temperatureSource = TemperatureSource.OBSERVING_CONDITIONS_DEVICE;
+                virtualFocuserInstance.observingConditionsDeviceId = (observingConditionsDeviceComboBox.SelectedItem as ComboboxItem).Value;
+            }
+            else
+            {
+                virtualFocuserInstance.temperatureSource = TemperatureSource.FOCUSER;
             }
 
             virtualFocuserInstance.tl.Enabled = chkTrace.Checked;
@@ -105,6 +137,12 @@ namespace ASCOM.DarkSkyGeek
                 MessageBox.Show(other.Message);
             }
         }
+
+        private void useObservingConditionsDeviceRadioBtn_CheckedChanged(object sender, EventArgs e)
+        {
+            observingConditionsDeviceComboBox.Enabled = (sender as RadioButton).Checked;
+        }
+
     }
 
     public class ComboboxItem

@@ -17,6 +17,8 @@ using System.Threading;
 
 namespace ASCOM.DarkSkyGeek
 {
+    public enum TemperatureSource { FOCUSER, OBSERVING_CONDITIONS_DEVICE };
+
     //
     // Your driver's DeviceID is ASCOM.DarkSkyGeek.VirtualFocuser
     //
@@ -49,9 +51,17 @@ namespace ASCOM.DarkSkyGeek
         internal static string positionToleranceProfileName = "Position Tolerance";
         internal static string positionToleranceDefault = "0";
 
+        internal static string temperatureSourceProfileName = "Temperature Source";
+        internal static string temperatureSourceDefault = TemperatureSource.FOCUSER.ToString();
+
+        internal static string observingConditionsDeviceIdProfileName = "Observing Conditions Device ID";
+        internal static string observingConditionsDeviceIdDefault = string.Empty;
+
         // Variables to hold the current device configuration
         internal string focuserId = string.Empty;
         internal uint positionTolerance = 0;
+        internal TemperatureSource temperatureSource = TemperatureSource.FOCUSER;
+        internal string observingConditionsDeviceId = string.Empty;
 
         /// <summary>
         /// Constant defining how many seconds to consider when computing the average temperature value.
@@ -79,6 +89,11 @@ namespace ASCOM.DarkSkyGeek
         /// Private variable to hold a reference to the real focuser we're controlling
         /// </summary>
         private ASCOM.DriverAccess.Focuser focuser;
+
+        /// <summary>
+        /// Private variable to hold a reference to the device we're reading the observing conditions from, if any.
+        /// </summary>
+        private ASCOM.DriverAccess.ObservingConditions observingConditionsDevice;
 
         /// <summary>
         /// Private variable to hold the temperature values we were able to obtain in the last `TEMPERATURE_WINDOW_IN_SECONDS` seconds
@@ -129,9 +144,19 @@ namespace ASCOM.DarkSkyGeek
                         try
                         {
                             TemperatureReading temperatureReading = new TemperatureReading();
-                            // This will throw if the focuser cannot report the temperature, hence the try ... catch!
-                            temperatureReading.Temperature = focuser.Temperature;
+
+                            // This will throw if the observing conditions device or focuser cannot report the temperature, hence the try ... catch!
+                            if (observingConditionsDevice != null)
+                            {
+                                temperatureReading.Temperature = observingConditionsDevice.Temperature;
+                            }
+                            else if (focuser != null)
+                            {
+                                temperatureReading.Temperature = focuser.Temperature;
+                            }
+
                             temperatureReading.Timestamp = now;
+
                             // I have seen the QHY Q-Focuser occasionally report insane values (like a million degrees)
                             // for a very short period of time, before coming back to its senses... These crazy values
                             // will completely skew the mean temperature calculation, so we ignore them thanks to this test:
@@ -253,10 +278,32 @@ namespace ASCOM.DarkSkyGeek
                                 Connected = true
                             };
 
+                            if (temperatureSource == TemperatureSource.OBSERVING_CONDITIONS_DEVICE)
+                            {
+                                observingConditionsDevice = new ASCOM.DriverAccess.ObservingConditions(observingConditionsDeviceId)
+                                {
+                                    Connected = true
+                                };
+                            }
+
                             connectedState = true;
                         }
                         catch (Exception)
                         {
+                            if (focuser != null)
+                            {
+                                focuser.Connected = false;
+                                focuser.Dispose();
+                                focuser = null;
+                            }
+
+                            if (observingConditionsDevice != null)
+                            {
+                                observingConditionsDevice.Connected = false;
+                                observingConditionsDevice.Dispose();
+                                observingConditionsDevice = null;
+                            }
+
                             throw new ASCOM.DriverException("Cannot connect to " + focuserId);
                         }
                     }
@@ -267,9 +314,19 @@ namespace ASCOM.DarkSkyGeek
                     {
                         connectedState = false;
 
-                        focuser.Connected = false;
-                        focuser.Dispose();
-                        focuser = null;
+                        if (focuser != null)
+                        {
+                            focuser.Connected = false;
+                            focuser.Dispose();
+                            focuser = null;
+                        }
+
+                        if (observingConditionsDevice != null)
+                        {
+                            observingConditionsDevice.Connected = false;
+                            observingConditionsDevice.Dispose();
+                            observingConditionsDevice = null;
+                        }
                     }
                 }
             }
@@ -559,6 +616,8 @@ namespace ASCOM.DarkSkyGeek
                     tl.Enabled = Convert.ToBoolean(driverProfile.GetValue(driverID, traceStateProfileName, string.Empty, traceStateDefault));
                     focuserId = driverProfile.GetValue(driverID, focuserIdProfileName, string.Empty, focuserIdDefault);
                     positionTolerance = Convert.ToUInt32(driverProfile.GetValue(driverID, positionToleranceProfileName, string.Empty, positionToleranceDefault));
+                    temperatureSource = (TemperatureSource) Convert.ToUInt32(driverProfile.GetValue(driverID, temperatureSourceProfileName, string.Empty, temperatureSourceDefault));
+                    observingConditionsDeviceId = driverProfile.GetValue(driverID, observingConditionsDeviceIdProfileName, string.Empty, observingConditionsDeviceIdDefault);
                 }
                 catch (Exception e)
                 {
@@ -575,6 +634,8 @@ namespace ASCOM.DarkSkyGeek
                 driverProfile.WriteValue(driverID, traceStateProfileName, tl.Enabled.ToString());
                 driverProfile.WriteValue(driverID, focuserIdProfileName, focuserId);
                 driverProfile.WriteValue(driverID, positionToleranceProfileName, positionTolerance.ToString());
+                driverProfile.WriteValue(driverID, temperatureSourceProfileName, ((int)temperatureSource).ToString());
+                driverProfile.WriteValue(driverID, observingConditionsDeviceIdProfileName, observingConditionsDeviceId);
             }
         }
 

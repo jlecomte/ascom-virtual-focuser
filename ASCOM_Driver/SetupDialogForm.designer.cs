@@ -154,7 +154,7 @@ namespace ASCOM.DarkSkyGeek
             this.tempSourceGroupBox.Size = new System.Drawing.Size(474, 119);
             this.tempSourceGroupBox.TabIndex = 14;
             this.tempSourceGroupBox.TabStop = false;
-            this.tempSourceGroupBox.Text = "Source of temperature readings";
+            this.tempSourceGroupBox.Text = "Source device for temperature readings";
             // 
             // observingConditionsDeviceComboBox
             // 
@@ -184,10 +184,10 @@ namespace ASCOM.DarkSkyGeek
             this.useFocuserForTemperatureRadioBtn.Checked = true;
             this.useFocuserForTemperatureRadioBtn.Location = new System.Drawing.Point(17, 24);
             this.useFocuserForTemperatureRadioBtn.Name = "useFocuserForTemperatureRadioBtn";
-            this.useFocuserForTemperatureRadioBtn.Size = new System.Drawing.Size(158, 17);
+            this.useFocuserForTemperatureRadioBtn.Size = new System.Drawing.Size(365, 17);
             this.useFocuserForTemperatureRadioBtn.TabIndex = 0;
             this.useFocuserForTemperatureRadioBtn.TabStop = true;
-            this.useFocuserForTemperatureRadioBtn.Text = "Use focuser selected above";
+            this.useFocuserForTemperatureRadioBtn.Text = "Use focuser selected above (if it is able to provide temperature readings)";
             this.useFocuserForTemperatureRadioBtn.UseVisualStyleBackColor = true;
             // 
             // errorProvider

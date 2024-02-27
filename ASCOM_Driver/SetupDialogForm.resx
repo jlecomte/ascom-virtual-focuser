@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="descriptionLabel.Text" xml:space="preserve">
-    <value>This driver forwards calls to the real focusing device selected below. It can enhance the behavior of an existing focuser, or work around its limitations. Please, refer to the GitHub repository for more details.</value>
+    <value>This driver forwards calls to the real focuser selected below. It can enhance the behavior of an existing focuser, or work around its limitations. Please, refer to the GitHub repository for more details.</value>
   </data>
   <metadata name="errorProvider.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>

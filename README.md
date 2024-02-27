@@ -30,11 +30,15 @@ The solution involves establishing a "position tolerance". Whenever the AF routi
 
 By default, the tolerance is set to 0, but it can be increased in the focuser settings dialog.
 
+### Read Temperature From Another Device
+
+Let’s say that you have a ZWO EAF electronic focuser, but you did not buy the optional temperature probe that ZWO sells separately, and as a result, the temperature readings you get from the focuser are completely wrong. Or maybe your temperature probe is not working correctly or reliably. Maybe it was not properly calibrated, which is something I have also noticed on some units. Or maybe you have an older focuser, or one that does not provide temperature readings, like the [Dark Sky Geek electronic focuser](https://github.com/jlecomte/ascom-oag-focuser), which was originally designed to control an OAG, so there would have been little value for me to add a temperature sensor to it. If you are in this situation, you will not be able to implement focus temperature compensation in NINA, because <ins>NINA only uses the temperature values reported by the focuser</ins>. So, what to do in this case? Well, if you look at the [ASCOM Platform API](https://ascom-standards.org/Help/Developer/html/G_ASCOM.htm), you’ll see that there are at least two types of devices that are able to report temperature values: obviously focusers, which implement the `IFocuserV3` interface, but also a category of devices that are able to report what the ASCOM standard calls “observing conditions'', and those devices implement the `IObservingConditions` interface. An ASCOM-compatible weather station would most likely be in that second category, and is essentially used in observatories as a safety monitor. Not that many people own an ASCOM-compatible weather station. However, a lot of astrophotographers own one of the Pegasus Astro PowerBox models, because those units have proven to be extremely useful by combining a USB hub, power distribution, and a dew heater controller. These devices come with a temperature and humidity sensor, so that they can control how much power should be sent to the dew heater bands. Well, guess what? Their ASCOM driver also implements the `IObservingConditions` interface, so they are able to report temperature values. And it turns out that the temperature values reported by my Pocket PowerBox Advance are much more stable and accurate than those provided by my QHY Q-Focuser when used with its temperature probe. Wouldn’t it be nice to have NINA use that device to get temperature readings instead? Well, yes, it would be. However, the NINA developers have rejected that idea. So, I ended up updating this virtual focuser driver to allow you to select the device you want to use as the source for the temperature readings.
+
 ## Screenshots
 
-To select the focuser device driver to connect to, open the settings dialog:
+Here is the driver settings dialog, where you can select the focuser you want to control, and set other options depending on your exact situation:
 
-![Screenshot of settings dialog](images/screenshot.png)
+![Screenshot of settings dialog](images/settings-dialog.png)
 
 ## Downloading And Installing The Driver
 

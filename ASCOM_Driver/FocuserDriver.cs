@@ -39,7 +39,7 @@ namespace ASCOM.DarkSkyGeek
         /// <summary>
         /// Driver description that displays in the ASCOM Chooser.
         /// </summary>
-        private static readonly string driverDescription = "DarkSkyGeek’s Virtual Focuser ASCOM Driver";
+        private static readonly string driverName = "DarkSkyGeek’s Virtual Focuser ASCOM Driver";
 
         // Constants used for Profile persistence
         internal static string traceStateProfileName = "Trace Level";
@@ -111,6 +111,9 @@ namespace ASCOM.DarkSkyGeek
         /// </summary>
         private int? _lastRequestedPosition = null;
 
+        private bool focuserHasTemperatureSupport = true;
+        private bool observingConditionsDeviceHasTemperatureSupport = true;
+
         public VirtualFocuser()
         {
             tl = new TraceLogger("", "DarkSkyGeek.VirtualFocuser");
@@ -145,14 +148,30 @@ namespace ASCOM.DarkSkyGeek
                         {
                             TemperatureReading temperatureReading = new TemperatureReading();
 
-                            // This will throw if the observing conditions device or focuser cannot report the temperature, hence the try ... catch!
+                            // Try the observing conditions device first, if we have one.
                             if (observingConditionsDevice != null)
                             {
-                                temperatureReading.Temperature = observingConditionsDevice.Temperature;
+                                try
+                                {
+                                    temperatureReading.Temperature = observingConditionsDevice.Temperature;
+                                }
+                                catch (ASCOM.PropertyNotImplementedException)
+                                {
+                                    observingConditionsDeviceHasTemperatureSupport = false;
+                                }
                             }
-                            else if (focuser != null)
+
+                            // Fall back to the focuser...
+                            if (focuser != null)
                             {
-                                temperatureReading.Temperature = focuser.Temperature;
+                                try
+                                {
+                                    temperatureReading.Temperature = focuser.Temperature;
+                                }
+                                catch (ASCOM.PropertyNotImplementedException)
+                                {
+                                    focuserHasTemperatureSupport = false;
+                                }
                             }
 
                             temperatureReading.Timestamp = now;
@@ -170,6 +189,12 @@ namespace ASCOM.DarkSkyGeek
                             // ignore
                         }
                     }
+                }
+
+                if ((observingConditionsDevice == null || !observingConditionsDeviceHasTemperatureSupport)
+                        && !focuserHasTemperatureSupport)
+                {
+                    break;
                 }
 
                 Thread.Sleep(1000);
@@ -336,8 +361,23 @@ namespace ASCOM.DarkSkyGeek
         {
             get
             {
-                tl.LogMessage("Description Get", driverDescription);
-                return driverDescription;
+                string description = "";
+
+                if (focuser != null)
+                {
+                    description += "Forwards commands to: " + focuser.Name;
+                    if (observingConditionsDevice != null)
+                    {
+                        description += " - Reads temperature from: " + observingConditionsDevice.Name;
+                    }
+                }
+                else
+                {
+                    description += "Not currently connected to a focuser";
+                }
+
+                tl.LogMessage("Description Get", description);
+                return description;
             }
         }
 
@@ -346,7 +386,7 @@ namespace ASCOM.DarkSkyGeek
             get
             {
                 Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-                string driverInfo = driverDescription + " Version " + String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
+                string driverInfo = driverName + " Version " + String.Format(CultureInfo.InvariantCulture, "{0}.{1}", version.Major, version.Minor);
                 tl.LogMessage("DriverInfo Get", driverInfo);
                 return driverInfo;
             }
@@ -377,8 +417,8 @@ namespace ASCOM.DarkSkyGeek
         {
             get
             {
-                tl.LogMessage("Name Get", driverDescription);
-                return driverDescription;
+                tl.LogMessage("Name Get", driverName);
+                return driverName;
             }
         }
 
@@ -504,6 +544,12 @@ namespace ASCOM.DarkSkyGeek
         {
             get
             {
+                if ((observingConditionsDevice == null || !observingConditionsDeviceHasTemperatureSupport)
+                        && !focuserHasTemperatureSupport)
+                {
+                    throw new ASCOM.PropertyNotImplementedException("Cannot read temperature");
+                }
+
                 lock (_temperaturesLockObject)
                 {
                     return temperatures.Select(x => x.Temperature).Average();
@@ -532,7 +578,7 @@ namespace ASCOM.DarkSkyGeek
                 P.DeviceType = "Focuser";
                 if (bRegister)
                 {
-                    P.Register(driverID, driverDescription);
+                    P.Register(driverID, driverName);
                 }
                 else
                 {

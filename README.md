@@ -7,6 +7,7 @@ I do not charge anything to create and maintain these open-source projects. But 
 * [Introduction](#introduction)
   + [Stable Temperature Reading](#stable-temperature-reading)
   + [Focuser Skipping Steps](#focuser-skipping-steps)
+  + [Read Temperature From Another Device](#read-temperature-from-another-device)
 * [Screenshots](#screenshots)
 * [Downloading And Installing The Driver](#downloading-and-installing-the-driver)
 * [Compiling The Driver (For Developers Only)](#compiling-the-driver-for-developers-only)

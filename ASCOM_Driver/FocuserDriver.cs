@@ -133,7 +133,11 @@ namespace ASCOM.DarkSkyGeek
 
         private void readCurrentTemperature()
         {
+            bool initialized = false;
+
             for (; ; ) {
+                Thread.Sleep(1000);
+
                 lock (_temperaturesLockObject)
                 {
                     long now = DateTimeOffset.Now.ToUnixTimeSeconds();
@@ -174,14 +178,23 @@ namespace ASCOM.DarkSkyGeek
                                 }
                             }
 
-                            temperatureReading.Timestamp = now;
-
-                            // I have seen the QHY Q-Focuser occasionally report insane values (like a million degrees)
-                            // for a very short period of time, before coming back to its senses... These crazy values
-                            // will completely skew the mean temperature calculation, so we ignore them thanks to this test:
-                            if (temperatureReading.Temperature >= MIN_TEMP_ALLOWED && temperatureReading.Temperature <= MAX_TEMP_ALLOWED)
+                            // For some strange reason, the first temperature reading we get from the devices I've tried is always 0.
+                            // If we blindly accepted that value, it would take up to 2 minutes (120 seconds) for the average temperature
+                            // to stabilize. To avoid that, we reject initial zero values. If, by an extraordinary set of circumstances,
+                            // the temperature were to be exactly 0°C (unlikely, but let's assume), that would be ok because the average
+                            // of an empty array would be zero anyway (see the implementation of the Temperature property below)
+                            if (initialized || temperatureReading.Temperature != 0)
                             {
-                                temperatures.Enqueue(temperatureReading);
+                                initialized = true;
+                                temperatureReading.Timestamp = now;
+
+                                // I have seen the QHY Q-Focuser occasionally report insane values (like a million degrees)
+                                // for a very short period of time, before coming back to its senses... These crazy values
+                                // will completely skew the mean temperature calculation, so we ignore them thanks to this test:
+                                if (temperatureReading.Temperature >= MIN_TEMP_ALLOWED && temperatureReading.Temperature <= MAX_TEMP_ALLOWED)
+                                {
+                                    temperatures.Enqueue(temperatureReading);
+                                }
                             }
                         }
                         catch (Exception)
@@ -196,8 +209,6 @@ namespace ASCOM.DarkSkyGeek
                 {
                     break;
                 }
-
-                Thread.Sleep(1000);
             }
         }
 

@@ -12,6 +12,7 @@ I do not charge anything to create and maintain these open-source projects. But 
 * [Downloading And Installing The Driver](#downloading-and-installing-the-driver)
 * [Compiling The Driver (For Developers Only)](#compiling-the-driver-for-developers-only)
 * [Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)
+* [Credits](#credits)
 
 ## Introduction
 
@@ -64,3 +65,7 @@ Open Microsoft Visual Studio as an administrator (right-click on the Microsoft V
 **Question:** My antivirus identifies your setup executable file as a malware (some kind of Trojan)
 
 **Answer:** This is a false detection, extremely common with installers created with [Inno Setup](https://jrsoftware.org/isinfo.php) because virus and malware authors also use Inno Setup to distribute their malicious payload... Anyway, there isn't much I can do about this, short of signing the executable. Unfortunately, that would require a code signing certificate, which costs money. So, even though the executable I uploaded to GitHub is perfectly safe, use at your own risk!
+
+## Credits
+
+The position tolerance feature was generously contributed by [Rafa Barberá](https://github.com/rbarbera).
